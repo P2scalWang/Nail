@@ -70,6 +70,20 @@ const BookingPage: React.FC<BookingFormProps> = ({ user, onComplete }) => {
     setLoading(false);
 
     if (success) {
+      // Trigger Notification (Fire and Forget)
+      fetch('/api/notify-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          booking: {
+            customerName: name,
+            date,
+            time,
+            services: selectedServices
+          }
+        })
+      }).catch(err => console.error('Notify Error', err));
+
       setMessage({ type: 'success', text: 'จองคิวสำเร็จแล้ว!' });
       setTimeout(onComplete, 2000);
     } else {

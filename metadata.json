@@ -1,0 +1,9 @@
+
+{
+  "name": "Nailnan Booking System",
+  "description": "A luxury nail salon booking application integrated with LINE LIFF and Firebase, featuring real-time availability and an admin dashboard.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

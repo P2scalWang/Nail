@@ -85,7 +85,7 @@ const BookingPage: React.FC<BookingFormProps> = ({ user, onComplete }) => {
     thaiTime.setDate(thaiTime.getDate() + daysToAdd);
     return thaiTime.toISOString().split('T')[0];
   };
-  const minDate = getThaiDate(1); // พรุ่งนี้
+  const minDate = getThaiDate(0); // จองได้ตั้งแต่วันนี้
 
   return (
     <div className="p-6 space-y-6 pb-32">

@@ -1,0 +1,16 @@
+{
+    "rules": {
+        "appointments": {
+            ".indexOn": [
+                "date",
+                "userId"
+            ],
+            ".read": true,
+            ".write": true
+        },
+        "gallery": {
+            ".read": true,
+            ".write": true
+        }
+    }
+}

@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { UserProfile, Appointment } from '../types';
 import { firebaseService } from '../firebase';
 // Added Sparkles to the list of icons imported from lucide-react to fix the compilation error
-import { Calendar as CalendarIcon, Clock, CheckCircle, AlertCircle, Sparkles, User as UserIcon } from 'lucide-react';
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar';
+import Clock from 'lucide-react/dist/esm/icons/clock';
+import CheckCircle from 'lucide-react/dist/esm/icons/check-circle';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import UserIcon from 'lucide-react/dist/esm/icons/user';
 
 interface BookingFormProps {
   user: UserProfile;

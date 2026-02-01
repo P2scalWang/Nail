@@ -2,18 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { Appointment } from './types';
 import { firebaseService } from './firebase';
-import {
-  Calendar,
-  RefreshCw,
-  User as UserIcon,
-  X,
-  Clock,
-  LayoutList,
-  History,
-  AlertCircle,
-  Check,
-  CheckCircle2
-} from 'lucide-react';
+import Calendar from 'lucide-react/dist/esm/icons/calendar';
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw';
+import UserIcon from 'lucide-react/dist/esm/icons/user';
+import X from 'lucide-react/dist/esm/icons/x';
+import Clock from 'lucide-react/dist/esm/icons/clock';
+import LayoutList from 'lucide-react/dist/esm/icons/layout-list';
+import History from 'lucide-react/dist/esm/icons/history';
+import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
+import Check from 'lucide-react/dist/esm/icons/check';
+import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
 import AdminGallery from './components/AdminGallery';
 
 type ViewMode = 'today' | 'pending' | 'all';

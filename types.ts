@@ -6,7 +6,8 @@ export interface Appointment {
   userPicture?: string;
   date: string; // YYYY-MM-DD
   time: string; // HH:00
-  service: string;
+  service: string; // Deprecated, kept for backward compatibility
+  services?: string[]; // New field for multiple services
   status: 'pending' | 'confirmed' | 'cancelled';
   createdAt: number;
 }

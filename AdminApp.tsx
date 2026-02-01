@@ -194,10 +194,14 @@ const AdminApp: React.FC = () => {
                   )}
                   <div className="min-w-0">
                     <span className="block font-bold text-slate-800 text-lg truncate mb-0.5">{app.userName}</span>
-                    <span className="flex items-center gap-1.5 text-xs text-rose-500 font-bold uppercase tracking-wide">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                      {app.service}
-                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {(app.services || [app.service]).map((s, i) => (
+                        <span key={i} className="flex items-center gap-1.5 text-xs text-rose-500 font-bold uppercase tracking-wide bg-rose-50 px-2 py-0.5 rounded-md">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                          {s}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 

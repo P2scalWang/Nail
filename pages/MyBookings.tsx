@@ -49,9 +49,13 @@ const MyBookings: React.FC<MyBookingsProps> = ({ user }) => {
               `}
             >
               <div className="flex justify-between items-start mb-3">
-                <span className="bg-rose-50 text-rose-500 text-[10px] font-bold px-2 py-1 rounded-full uppercase">
-                  {booking.service}
-                </span>
+                <div className="flex flex-wrap gap-1 max-w-[70%]">
+                  {(booking.services || [booking.service]).map((s, i) => (
+                    <span key={i} className="bg-rose-50 text-rose-500 text-[10px] font-bold px-2 py-1 rounded-full uppercase">
+                      {s}
+                    </span>
+                  ))}
+                </div>
                 <span className={`text-[10px] font-bold px-2 py-1 rounded-full
                   ${booking.status === 'confirmed' ? 'bg-green-50 text-green-600' :
                     booking.status === 'cancelled' ? 'bg-stone-100 text-stone-500' :

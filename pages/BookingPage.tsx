@@ -18,7 +18,7 @@ const TIME_SLOTS = [
 const BookingPage: React.FC<BookingFormProps> = ({ user, onComplete }) => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [service, setService] = useState('');
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [name, setName] = useState(user.displayName || '');
   const [loading, setLoading] = useState(false);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
@@ -38,9 +38,17 @@ const BookingPage: React.FC<BookingFormProps> = ({ user, onComplete }) => {
     setBookedSlots(taken);
   };
 
+  const toggleService = (s: string) => {
+    setSelectedServices(prev =>
+      prev.includes(s)
+        ? prev.filter(item => item !== s)
+        : [...prev, s]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !time || !service) {
+    if (!date || !time || selectedServices.length === 0) {
       setMessage({ type: 'error', text: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
       return;
     }
@@ -52,7 +60,8 @@ const BookingPage: React.FC<BookingFormProps> = ({ user, onComplete }) => {
       userPicture: user.pictureUrl,
       date,
       time,
-      service,
+      service: selectedServices.join(', '), // For backward compatibility
+      services: selectedServices,
       status: 'pending',
       createdAt: Date.now()
     };
@@ -146,25 +155,32 @@ const BookingPage: React.FC<BookingFormProps> = ({ user, onComplete }) => {
           )}
 
           <label className="block">
-            <span className="text-sm font-semibold text-stone-700 flex items-center gap-2 mb-2">
-              <Sparkles size={16} /> เลือกบริการ
-            </span>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                <Sparkles size={16} /> เลือกบริการ
+              </span>
+              <span className="text-xs text-stone-400 font-medium">เลือกได้มากกว่า 1 อย่าง</span>
+            </div>
             <div className="grid grid-cols-1 gap-2">
-              {SERVICES.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setService(s)}
-                  className={`p-4 rounded-xl text-left text-sm font-medium transition-all border
-                    ${service === s
-                      ? 'bg-rose-50 border-rose-400 text-rose-700 ring-4 ring-rose-50'
-                      : 'bg-white border-stone-100 text-stone-600 hover:border-rose-200 hover:bg-rose-50/30'
-                    }
-                  `}
-                >
-                  {s}
-                </button>
-              ))}
+              {SERVICES.map((s) => {
+                const isSelected = selectedServices.includes(s);
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => toggleService(s)}
+                    className={`p-4 rounded-xl text-left text-sm font-medium transition-all border flex justify-between items-center
+                      ${isSelected
+                        ? 'bg-rose-50 border-rose-400 text-rose-700 ring-4 ring-rose-50'
+                        : 'bg-white border-stone-100 text-stone-600 hover:border-rose-200 hover:bg-rose-50/30'
+                      }
+                    `}
+                  >
+                    <span>{s}</span>
+                    {isSelected && <CheckCircle size={16} className="text-rose-500" />}
+                  </button>
+                );
+              })}
             </div>
           </label>
         </div>
@@ -180,7 +196,7 @@ const BookingPage: React.FC<BookingFormProps> = ({ user, onComplete }) => {
 
         <button
           type="submit"
-          disabled={loading || !date || !time || !service}
+          disabled={loading || !date || !time || selectedServices.length === 0}
           className="w-full bg-rose-500 text-white py-4 rounded-2xl font-bold shadow-lg disabled:opacity-50 disabled:shadow-none transition-all active:scale-95"
         >
           {loading ? 'กำลังดำเนินการ...' : 'ยืนยันการจอง'}

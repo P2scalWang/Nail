@@ -1,9 +1,12 @@
 import React from 'react';
 import { Appointment } from '../types';
+import ChevronLeft from 'lucide-react/dist/esm/icons/chevron-left';
+import ChevronRight from 'lucide-react/dist/esm/icons/chevron-right';
 
 interface AdminMonthlyTableProps {
     currentDate: Date;
     appointments: Appointment[];
+    onDateChange: (date: Date) => void;
 }
 
 const TIME_SLOTS = [
@@ -11,8 +14,37 @@ const TIME_SLOTS = [
     '15:00', '16:00', '17:00', '18:00', '19:00'
 ];
 
-const AdminMonthlyTable: React.FC<AdminMonthlyTableProps> = ({ currentDate, appointments }) => {
+const THAI_MONTHS = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+];
+
+const AdminMonthlyTable: React.FC<AdminMonthlyTableProps> = ({ currentDate, appointments, onDateChange }) => {
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+
+    const handlePrevMonth = () => {
+        onDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    };
+
+    const handleNextMonth = () => {
+        onDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    };
+
+    const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newMonth = parseInt(e.target.value);
+        onDateChange(new Date(currentDate.getFullYear(), newMonth, 1));
+    };
+
+    const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newYear = parseInt(e.target.value);
+        onDateChange(new Date(newYear, currentDate.getMonth(), 1));
+    };
+
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+        years.push(i);
+    }
 
     const renderRows = () => {
         const rows = [];
@@ -70,8 +102,35 @@ const AdminMonthlyTable: React.FC<AdminMonthlyTableProps> = ({ currentDate, appo
 
     return (
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="p-4 bg-slate-50 border-b border-slate-100 font-bold text-slate-700 shadow-sm z-20">
-                ตารางคิวงานประจำเดือน {currentDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' })}
+            <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between shadow-sm z-20">
+                <div className="flex items-center gap-2">
+                    <select
+                        value={currentDate.getMonth()}
+                        onChange={handleMonthChange}
+                        className="bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg focus:ring-rose-500 focus:border-rose-500 block p-2 cursor-pointer hover:bg-slate-50"
+                    >
+                        {THAI_MONTHS.map((month, index) => (
+                            <option key={index} value={index}>{month}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={currentDate.getFullYear()}
+                        onChange={handleYearChange}
+                        className="bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg focus:ring-rose-500 focus:border-rose-500 block p-2 cursor-pointer hover:bg-slate-50"
+                    >
+                        {years.map(year => (
+                            <option key={year} value={year}>{year + 543}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="flex gap-1">
+                    <button onClick={handlePrevMonth} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+                        <ChevronLeft size={20} />
+                    </button>
+                    <button onClick={handleNextMonth} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+                        <ChevronRight size={20} />
+                    </button>
+                </div>
             </div>
             <div className="overflow-auto flex-1">
                 <table className="w-full border-collapse">

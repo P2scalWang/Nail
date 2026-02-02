@@ -10,6 +10,11 @@ interface AdminCalendarProps {
     onSelectDate: (dateString: string) => void;
 }
 
+const THAI_MONTHS = [
+    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+];
+
 const AdminCalendar: React.FC<AdminCalendarProps> = ({ currentDate, onDateChange, appointments, onSelectDate }) => {
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -22,7 +27,22 @@ const AdminCalendar: React.FC<AdminCalendarProps> = ({ currentDate, onDateChange
         onDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     };
 
-    const monthName = currentDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newMonth = parseInt(e.target.value);
+        onDateChange(new Date(currentDate.getFullYear(), newMonth, 1));
+    };
+
+    const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newYear = parseInt(e.target.value);
+        // 543 is for Thai Buddhist Calendar display, but value is Gregorian
+        onDateChange(new Date(newYear, currentDate.getMonth(), 1));
+    };
+
+    const currentYear = new Date().getFullYear(); // Use current real year for range generation
+    const years = [];
+    for (let i = currentYear - 2; i <= currentYear + 2; i++) {
+        years.push(i);
+    }
 
     // Group appointments by date
     const appointmentsByDate = useMemo(() => {
@@ -89,14 +109,31 @@ const AdminCalendar: React.FC<AdminCalendarProps> = ({ currentDate, onDateChange
     return (
         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
             <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    {monthName}
-                </h2>
+                <div className="flex items-center gap-2">
+                    <select
+                        value={currentDate.getMonth()}
+                        onChange={handleMonthChange}
+                        className="bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg focus:ring-rose-500 focus:border-rose-500 block p-2 cursor-pointer hover:bg-slate-50"
+                    >
+                        {THAI_MONTHS.map((month, index) => (
+                            <option key={index} value={index}>{month}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={currentDate.getFullYear()}
+                        onChange={handleYearChange}
+                        className="bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg focus:ring-rose-500 focus:border-rose-500 block p-2 cursor-pointer hover:bg-slate-50"
+                    >
+                        {years.map(year => (
+                            <option key={year} value={year}>{year + 543}</option>
+                        ))}
+                    </select>
+                </div>
                 <div className="flex gap-1">
-                    <button onClick={handlePrevMonth} className="p-1 hover:bg-slate-200 rounded-lg text-slate-600">
+                    <button onClick={handlePrevMonth} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
                         <ChevronLeft size={20} />
                     </button>
-                    <button onClick={handleNextMonth} className="p-1 hover:bg-slate-200 rounded-lg text-slate-600">
+                    <button onClick={handleNextMonth} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
                         <ChevronRight size={20} />
                     </button>
                 </div>

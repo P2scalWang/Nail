@@ -183,6 +183,7 @@ const AdminApp: React.FC = () => {
               <AdminMonthlyTable
                 currentDate={currentDateObj}
                 appointments={appointments}
+                onDateChange={handleDateChange}
               />
             ) : appointments.length === 0 ? (
               <div className="bg-white rounded-3xl p-12 border-2 border-dashed border-slate-200 text-center flex flex-col items-center">

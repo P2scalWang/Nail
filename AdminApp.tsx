@@ -67,7 +67,11 @@ const AdminApp: React.FC = () => {
 
   // Helper for Calendar date change
   const handleDateChange = (newDate: Date) => {
-    setDate(newDate.toISOString().split('T')[0]);
+    // Format manually to avoid timezone shifting from toISOString() check
+    const year = newDate.getFullYear();
+    const month = String(newDate.getMonth() + 1).padStart(2, '0');
+    const day = String(newDate.getDate()).padStart(2, '0');
+    setDate(`${year}-${month}-${day}`);
   };
 
   const currentDateObj = React.useMemo(() => new Date(date), [date]);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Appointment } from './types';
 import { firebaseService } from './firebase';
@@ -12,9 +11,13 @@ import History from 'lucide-react/dist/esm/icons/history';
 import AlertCircle from 'lucide-react/dist/esm/icons/alert-circle';
 import Check from 'lucide-react/dist/esm/icons/check';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import Grid from 'lucide-react/dist/esm/icons/grid';
+import Table2 from 'lucide-react/dist/esm/icons/table-2';
 import AdminGallery from './components/AdminGallery';
+import AdminCalendar from './components/AdminCalendar';
+import AdminMonthlyTable from './components/AdminMonthlyTable';
 
-type ViewMode = 'today' | 'pending' | 'all';
+type ViewMode = 'today' | 'pending' | 'all' | 'calendar' | 'month_table';
 
 const AdminApp: React.FC = () => {
   // ใช้ timezone ประเทศไทย (UTC+7)
@@ -35,7 +38,7 @@ const AdminApp: React.FC = () => {
     if (viewMode === 'today') {
       data = await firebaseService.getAppointmentsByDate(date);
     } else {
-      // Fetch all for pending/all views (can be optimized later)
+      // Fetch all for pending/all/calendar/table views
       const allData = await firebaseService.getAppointments();
       if (viewMode === 'pending') {
         data = allData.filter(a => a.status === 'pending' || !a.status);
@@ -62,11 +65,12 @@ const AdminApp: React.FC = () => {
     fetchAppointments();
   }, [fetchAppointments]);
 
-  const stats = React.useMemo(() => ({
-    total: appointments.length,
-    confirmed: appointments.filter(a => a.status === 'confirmed').length,
-    pending: appointments.filter(a => a.status !== 'confirmed' && a.status !== 'cancelled').length,
-  }), [appointments]);
+  // Helper for Calendar date change
+  const handleDateChange = (newDate: Date) => {
+    setDate(newDate.toISOString().split('T')[0]);
+  };
+
+  const currentDateObj = React.useMemo(() => new Date(date), [date]);
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
@@ -89,24 +93,38 @@ const AdminApp: React.FC = () => {
       <main className="max-w-4xl mx-auto p-4 md:p-8">
 
         {/* Navigation Tabs */}
-        <div className="flex p-1 bg-white rounded-2xl border border-slate-200 mb-6 shadow-sm overflow-x-auto">
+        <div className="flex p-1 bg-white rounded-2xl border border-slate-200 mb-6 shadow-sm overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setViewMode('today')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all whitespace-nowrap
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all whitespace-nowrap min-w-[90px]
               ${viewMode === 'today' ? 'bg-rose-500 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
           >
-            <Calendar size={16} /> วันนี้
+            <Clock size={16} /> วันนี้
+          </button>
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all whitespace-nowrap min-w-[90px]
+               ${viewMode === 'calendar' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <Calendar size={16} /> ปฏิทิน
+          </button>
+          <button
+            onClick={() => setViewMode('month_table')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all whitespace-nowrap min-w-[90px]
+               ${viewMode === 'month_table' ? 'bg-teal-500 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <Table2 size={16} /> ตาราง
           </button>
           <button
             onClick={() => setViewMode('pending')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all whitespace-nowrap
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all whitespace-nowrap min-w-[90px]
               ${viewMode === 'pending' ? 'bg-amber-500 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
           >
-            <AlertCircle size={16} /> รอดำเนินการ
+            <AlertCircle size={16} /> รอยืนยัน
           </button>
           <button
             onClick={() => setViewMode('all')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold transition-all whitespace-nowrap
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all whitespace-nowrap min-w-[90px]
               ${viewMode === 'all' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <History size={16} /> ทั้งหมด
@@ -117,10 +135,16 @@ const AdminApp: React.FC = () => {
         <div className="flex items-center justify-between mb-4 px-2">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-              {viewMode === 'today' && <Calendar size={18} className="text-rose-500" />}
+              {viewMode === 'today' && <Clock size={18} className="text-rose-500" />}
+              {viewMode === 'calendar' && <Calendar size={18} className="text-indigo-500" />}
+              {viewMode === 'month_table' && <Table2 size={18} className="text-teal-500" />}
               {viewMode === 'pending' && <AlertCircle size={18} className="text-amber-500" />}
               {viewMode === 'all' && <LayoutList size={18} className="text-slate-500" />}
-              {viewMode === 'today' ? 'คิวงานวันนี้' : viewMode === 'pending' ? 'รายการรอยืนยัน' : 'ประวัติทั้งหมด'}
+
+              {viewMode === 'today' ? 'คิวงานวันนี้' :
+                viewMode === 'calendar' ? 'ปฏิทินงาน' :
+                  viewMode === 'month_table' ? 'ตารางรายเดือน' :
+                    viewMode === 'pending' ? 'รายการรอยืนยัน' : 'ประวัติทั้งหมด'}
             </h3>
             <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-bold">
               {appointments.length}
@@ -142,90 +166,110 @@ const AdminApp: React.FC = () => {
             <RefreshCw className="animate-spin text-rose-500" size={32} />
             <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">กำลังโหลดข้อมูล...</p>
           </div>
-        ) : appointments.length === 0 ? (
-          <div className="bg-white rounded-3xl p-12 border-2 border-dashed border-slate-200 text-center flex flex-col items-center">
-            {viewMode === 'pending' ? (
-              <CheckCircle2 size={48} className="text-emerald-200 mb-4" />
-            ) : (
-              <Calendar size={48} className="text-slate-200 mb-4" />
-            )}
-            <p className="text-slate-400 font-medium font-luxury">
-              {viewMode === 'pending' ? 'เคลียร์ครบแล้ว ยอดเยี่ยม!' : 'ไม่มีรายการจอง'}
-            </p>
-          </div>
         ) : (
-          <div className="grid gap-3">
-            {appointments.map((app) => (
-              <div key={app.id}
-                className={`bg-white rounded-3xl p-5 border shadow-sm hover:border-rose-200 transition-all flex flex-col md:flex-row md:items-center gap-4 relative overflow-hidden
-                  ${app.status === 'pending' || !app.status ? 'border-amber-200 shadow-amber-50' : 'border-slate-200'}
-                `}
-              >
-                {/* Pending Indicator Strip */}
-                {(app.status === 'pending' || !app.status) && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-400"></div>
+          <>
+            {/* View Switching */}
+            {viewMode === 'calendar' ? (
+              <AdminCalendar
+                currentDate={currentDateObj}
+                onDateChange={handleDateChange}
+                appointments={appointments}
+                onSelectDate={(d) => {
+                  setDate(d);
+                  setViewMode('today');
+                }}
+              />
+            ) : viewMode === 'month_table' ? (
+              <AdminMonthlyTable
+                currentDate={currentDateObj}
+                appointments={appointments}
+              />
+            ) : appointments.length === 0 ? (
+              <div className="bg-white rounded-3xl p-12 border-2 border-dashed border-slate-200 text-center flex flex-col items-center">
+                {viewMode === 'pending' ? (
+                  <CheckCircle2 size={48} className="text-emerald-200 mb-4" />
+                ) : (
+                  <Calendar size={48} className="text-slate-200 mb-4" />
                 )}
+                <p className="text-slate-400 font-medium font-luxury">
+                  {viewMode === 'pending' ? 'เคลียร์ครบแล้ว ยอดเยี่ยม!' : 'ไม่มีรายการจอง'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {appointments.map((app) => (
+                  <div key={app.id}
+                    className={`bg-white rounded-3xl p-5 border shadow-sm hover:border-rose-200 transition-all flex flex-col md:flex-row md:items-center gap-4 relative overflow-hidden
+                      ${app.status === 'pending' || !app.status ? 'border-amber-200 shadow-amber-50' : 'border-slate-200'}
+                    `}
+                  >
+                    {/* Pending Indicator Strip */}
+                    {(app.status === 'pending' || !app.status) && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-400"></div>
+                    )}
 
-                {/* Date & Time Badge */}
-                <div className="flex md:flex-col items-center justify-between md:justify-center md:w-24 md:border-r md:pr-6 gap-2">
-                  {(viewMode !== 'today') && (
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      {new Date(app.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
-                    </span>
-                  )}
-                  <span className="text-xl font-bold text-slate-800">{app.time}</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${app.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                    app.status === 'cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
-                    }`}>
-                    {app.status || 'รอรับงาน'}
-                  </span>
-                </div>
-
-                {/* Customer Info */}
-                <div className="flex items-center gap-4 flex-1 min-w-0 pl-2">
-                  {app.userPicture ? (
-                    <img src={app.userPicture} className="w-12 h-12 rounded-2xl border border-slate-100 object-cover shadow-sm" alt="avatar" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
-                      <UserIcon size={20} />
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <span className="block font-bold text-slate-800 text-lg truncate mb-0.5">{app.userName}</span>
-                    <div className="flex flex-wrap gap-1">
-                      {(app.services || [app.service]).map((s, i) => (
-                        <span key={i} className="flex items-center gap-1.5 text-xs text-rose-500 font-bold uppercase tracking-wide bg-rose-50 px-2 py-0.5 rounded-md">
-                          <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                          {s}
+                    {/* Date & Time Badge */}
+                    <div className="flex md:flex-col items-center justify-between md:justify-center md:w-24 md:border-r md:pr-6 gap-2">
+                      {(viewMode !== 'today') && (
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          {new Date(app.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
                         </span>
-                      ))}
+                      )}
+                      <span className="text-xl font-bold text-slate-800">{app.time}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${app.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
+                        app.status === 'cancelled' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                        }`}>
+                        {app.status || 'รอรับงาน'}
+                      </span>
+                    </div>
+
+                    {/* Customer Info */}
+                    <div className="flex items-center gap-4 flex-1 min-w-0 pl-2">
+                      {app.userPicture ? (
+                        <img src={app.userPicture} className="w-12 h-12 rounded-2xl border border-slate-100 object-cover shadow-sm" alt="avatar" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                          <UserIcon size={20} />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <span className="block font-bold text-slate-800 text-lg truncate mb-0.5">{app.userName}</span>
+                        <div className="flex flex-wrap gap-1">
+                          {(app.services || [app.service]).map((s, i) => (
+                            <span key={i} className="flex items-center gap-1.5 text-xs text-rose-500 font-bold uppercase tracking-wide bg-rose-50 px-2 py-0.5 rounded-md">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-50 mt-2 md:mt-0">
+                      {app.status !== 'confirmed' && (
+                        <button
+                          onClick={() => handleUpdateStatus(app.id!, 'confirmed')}
+                          className="flex-1 md:flex-none py-2.5 px-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-100 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        >
+                          <Check size={16} /> ยืนยัน
+                        </button>
+                      )}
+                      {app.status !== 'cancelled' && (
+                        <button
+                          onClick={() => handleUpdateStatus(app.id!, 'cancelled')}
+                          className="p-2.5 px-4 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl border border-slate-200 transition-all active:scale-95"
+                          title="ยกเลิกนัด"
+                        >
+                          <X size={18} />
+                        </button>
+                      )}
                     </div>
                   </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-50 mt-2 md:mt-0">
-                  {app.status !== 'confirmed' && (
-                    <button
-                      onClick={() => handleUpdateStatus(app.id!, 'confirmed')}
-                      className="flex-1 md:flex-none py-2.5 px-6 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-100 transition-all active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <Check size={16} /> ยืนยัน
-                    </button>
-                  )}
-                  {app.status !== 'cancelled' && (
-                    <button
-                      onClick={() => handleUpdateStatus(app.id!, 'cancelled')}
-                      className="p-2.5 px-4 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl border border-slate-200 transition-all active:scale-95"
-                      title="ยกเลิกนัด"
-                    >
-                      <X size={18} />
-                    </button>
-                  )}
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
 
         <div className="my-8 border-t border-slate-200" />
